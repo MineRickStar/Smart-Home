@@ -1,12 +1,12 @@
 package start;
 
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import user.Inhabitant;
-import user.Person;
 
 /**
  * The Class TaskHandler.
@@ -38,26 +38,26 @@ public class TaskHandler {
 	/**
 	 * Adds a task with a name of the form "Task-#".
 	 *
-	 * @param dueDate            the due date
-	 * @param creator            the creator
-	 * @param presumableFinisher the presumable finisher
+	 * @param nextDueDate the next due date
+	 * @param period      the period
+	 * @param rooms       the rooms
 	 * @return the task
 	 */
-	public Task createTask(LocalDateTime dueDate, Person creator, Inhabitant presumableFinisher) {
-		return this.createTask("Task-" + TaskHandler.counter++, dueDate, creator, presumableFinisher);
+	public Task createTask(LocalDateTime nextDueDate, Period period, ArrayList<Room> rooms) {
+		return this.createTask("Task-" + TaskHandler.counter++, nextDueDate, period, rooms);
 	}
 
 	/**
-	 * Adds a task with the given name and now as the creatTime.
+	 * Adds a task with the given name and now as the createTime.
 	 *
-	 * @param name               the name
-	 * @param dueDate            the due date
-	 * @param creator            the creator
-	 * @param presumableFinisher the presumable finisher
+	 * @param name        the name
+	 * @param nextDueDate the next due date
+	 * @param period      the period
+	 * @param rooms       the rooms
 	 * @return the task
 	 */
-	public Task createTask(String name, LocalDateTime dueDate, Person creator, Inhabitant presumableFinisher) {
-		Task task = new Task(name, LocalDateTime.now(), dueDate, creator, presumableFinisher);
+	public Task createTask(String name, LocalDateTime nextDueDate, Period period, ArrayList<Room> rooms) {
+		Task task = new Task(name, LocalDateTime.now(), nextDueDate, period, rooms);
 		this.tasks.add(task);
 		return task;
 	}
@@ -70,8 +70,8 @@ public class TaskHandler {
 	 */
 	public List<Task> getTasksFor(Inhabitant inhabitant) {
 		return this.tasks.parallelStream()
-				.filter(task -> task.getPresumableFinisher()
-						.equals(inhabitant))
+				.filter(task -> task.getPresumableFinishers()
+						.contains(inhabitant))
 				.collect(Collectors.toList());
 	}
 

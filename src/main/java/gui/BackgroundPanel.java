@@ -1,10 +1,14 @@
 package gui;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
 
 import javax.swing.JPanel;
+
+import gui.view.ViewDefault;
+import gui.view.ViewTask;
 
 /**
  * The Class BackgroundPanel.
@@ -21,12 +25,44 @@ public class BackgroundPanel extends JPanel {
 
 	/**
 	 * Instantiates a new background panel.
-	 *
-	 * @param currentBackground the current background
 	 */
-	public BackgroundPanel(Image currentBackground) {
-		this.currentBackground = currentBackground;
-		this.setLayout(new GridLayout(10, 10));
+	public BackgroundPanel() {
+		this.setLayout(new GridLayout(1, 1));
+		this.setBackground(Color.BLACK);
+	}
+
+	/**
+	 * Change view.
+	 *
+	 * @param view the view
+	 */
+	public void changeView(View view) {
+		this.removeAll();
+		switch (view) {
+		case ADD_TASK:
+			this.add(new ViewTask(this));
+			break;
+		case DEFAULT:
+			this.add(new ViewDefault(this));
+			break;
+		}
+		this.revalidate();
+		this.repaint();
+	}
+
+	/**
+	 * The Enum View.
+	 */
+	public enum View {
+
+		/** The add task. */
+		ADD_TASK,
+		/** The default. */
+		DEFAULT;
+	}
+
+	public void setBackground(Image background) {
+		this.currentBackground = background;
 	}
 
 	@Override

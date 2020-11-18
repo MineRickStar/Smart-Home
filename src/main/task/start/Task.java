@@ -1,9 +1,13 @@
 package start;
 
 import java.time.LocalDateTime;
+import java.time.Period;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 import user.Inhabitant;
-import user.Person;
 
 /**
  * The Class Task.
@@ -22,38 +26,39 @@ public class Task {
 	/** The create date. */
 	private final LocalDateTime createDate;
 
-	/** The due date. */
-	private LocalDateTime dueDate;
+	/** The period. */
+	private Period period;
 
-	/** The finished. */
-	private LocalDateTime finished;
-
-	/** The creator. */
-	private final Person creator;
+	/** The next due date. */
+	private LocalDateTime nextDueDate;
 
 	/** The presumable finisher. */
-	private Inhabitant presumableFinisher;
+	private ArrayList<Inhabitant> presumableFinishers;
 
-	/** The finisher. */
-	private Inhabitant finisher;
+	/** The finished. */
+	private final HashMap<Inhabitant, List<LocalDateTime>> finished;
+
+	/** The rooms. */
+	private ArrayList<Room> rooms;
 
 	/**
 	 * Instantiates a new task.
 	 *
-	 * @param name               the name
-	 * @param createDate         the create date
-	 * @param dueDate            the due date
-	 * @param creator            the creator
-	 * @param presumableFinisher the presumable finisher
+	 * @param name        the name
+	 * @param createDate  the create date
+	 * @param nextDueDate the next due date
+	 * @param period      the period
+	 * @param rooms       the rooms
 	 */
-	public Task(String name, LocalDateTime createDate, LocalDateTime dueDate, Person creator,
-			Inhabitant presumableFinisher) {
+	public Task(String name, LocalDateTime createDate, LocalDateTime nextDueDate, Period period,
+			ArrayList<Room> rooms) {
 		this.taskID = TaskID.getRandomID();
 		this.name = name;
 		this.createDate = createDate;
-		this.dueDate = dueDate;
-		this.creator = creator;
-		this.presumableFinisher = presumableFinisher;
+		this.nextDueDate = nextDueDate;
+		this.period = period;
+		this.finished = new HashMap<>();
+		this.rooms = rooms;
 	}
 
 	/**
@@ -70,18 +75,49 @@ public class Task {
 	}
 
 	/**
-	 * Marks the Task as finishe, with given Inhabitant and the given endTime.
+	 * Marks the Task as completed for now and starts the Time again.
 	 *
-	 * @param when the when
 	 * @param who  the who
+	 * @param when the when
 	 */
-	public void finished(LocalDateTime when, Inhabitant who) {
-		this.finished = when;
-		this.finisher = who;
+	public void finished(Inhabitant who, LocalDateTime when) {
+		this.finished.compute(who, (k, v) -> {
+			if (v == null) {
+				return Arrays.asList(when);
+			} else {
+				v.add(when);
+				return v;
+			}
+		});
+		this.nextDueDate = when.plus(this.period);
 	}
 
-	public Inhabitant getPresumableFinisher() {
-		return this.presumableFinisher;
+	public LocalDateTime getNextDueDate() {
+		return this.nextDueDate;
+	}
+
+	public ArrayList<Inhabitant> getPresumableFinishers() {
+		return this.presumableFinishers;
+	}
+
+	/**
+	 * Removes the presumable finisher.
+	 *
+	 * @param inhabitant the inhabitant
+	 */
+	public void removePresumableFinisher(Inhabitant inhabitant) {
+		this.presumableFinishers.remove(inhabitant);
+	}
+
+	/**
+	 * Adds the presumable finisher.
+	 *
+	 * @param inhabitant the inhabitant
+	 */
+	public void addPresumableFinisher(Inhabitant inhabitant) {
+		if (!this.presumableFinishers.contains(inhabitant)) {
+			this.presumableFinishers.add(inhabitant);
+		}
 	}
 
 	@Override
