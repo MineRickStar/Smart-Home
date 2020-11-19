@@ -8,7 +8,8 @@ import java.awt.Image;
 import javax.swing.JPanel;
 
 import gui.view.ViewDefault;
-import gui.view.ViewTask;
+import gui.view.ViewTaskAdd;
+import gui.view.ViewTasks;
 
 /**
  * The Class BackgroundPanel.
@@ -40,11 +41,13 @@ public class BackgroundPanel extends JPanel {
 		this.removeAll();
 		switch (view) {
 		case ADD_TASK:
-			this.add(new ViewTask(this));
+			this.add(new ViewTaskAdd(this));
 			break;
 		case DEFAULT:
 			this.add(new ViewDefault(this));
 			break;
+		case VIEW_TASKS:
+			this.add(new ViewTasks(this));
 		}
 		this.revalidate();
 		this.repaint();
@@ -58,7 +61,9 @@ public class BackgroundPanel extends JPanel {
 		/** The add task. */
 		ADD_TASK,
 		/** The default. */
-		DEFAULT;
+		DEFAULT,
+		/** The view tasks. */
+		VIEW_TASKS;
 	}
 
 	public void setBackground(Image background) {

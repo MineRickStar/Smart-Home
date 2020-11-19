@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import user.Inhabitant;
 
@@ -33,30 +37,62 @@ public class Task {
 	private LocalDateTime nextDueDate;
 
 	/** The presumable finisher. */
-	private ArrayList<Inhabitant> presumableFinishers;
+	private List<Inhabitant> presumableFinishers;
 
 	/** The finished. */
 	private final HashMap<Inhabitant, List<LocalDateTime>> finished;
 
+	/** The when to finish. */
+	private Time whenToFinish;
+
 	/** The rooms. */
-	private ArrayList<Room> rooms;
+	private List<Room> rooms;
 
 	/**
 	 * Instantiates a new task.
 	 *
-	 * @param name        the name
-	 * @param createDate  the create date
-	 * @param nextDueDate the next due date
-	 * @param period      the period
-	 * @param rooms       the rooms
+	 * @param line the line
 	 */
-	public Task(String name, LocalDateTime createDate, LocalDateTime nextDueDate, Period period,
+	Task(String line) {
+		String[] fields = line.split(",");
+		this.taskID = TaskID.of(fields[0]);
+		this.name = fields[1];
+		this.description = fields[2];
+		this.createDate = LocalDateTime.parse(fields[3]);
+		this.period = Period.parse(fields[4]);
+		this.nextDueDate = LocalDateTime.parse(fields[5]);
+		if (!fields[6].isEmpty()) {
+			this.presumableFinishers = Arrays.stream(fields[6].split("/"))
+					.map(Inhabitant::new)
+					.collect(Collectors.toList());
+		}
+		this.finished = new HashMap<>();
+		this.whenToFinish = Time.valueOf(fields[7]);
+		if (!fields[8].isEmpty()) {
+			this.rooms = Arrays.stream(fields[8].split("/"))
+					.map(Room::valueOf)
+					.collect(Collectors.toList());
+		}
+	}
+
+	/**
+	 * Instantiates a new task.
+	 *
+	 * @param name         the name
+	 * @param createDate   the create date
+	 * @param nextDueDate  the next due date
+	 * @param period       the period
+	 * @param whenToFinish the when to finish
+	 * @param rooms        the rooms
+	 */
+	public Task(String name, LocalDateTime createDate, LocalDateTime nextDueDate, Period period, Time whenToFinish,
 			ArrayList<Room> rooms) {
 		this.taskID = TaskID.getRandomID();
 		this.name = name;
 		this.createDate = createDate;
 		this.nextDueDate = nextDueDate;
 		this.period = period;
+		this.whenToFinish = whenToFinish;
 		this.finished = new HashMap<>();
 		this.rooms = rooms;
 	}
@@ -96,7 +132,7 @@ public class Task {
 		return this.nextDueDate;
 	}
 
-	public ArrayList<Inhabitant> getPresumableFinishers() {
+	public List<Inhabitant> getPresumableFinishers() {
 		return this.presumableFinishers;
 	}
 
@@ -118,6 +154,51 @@ public class Task {
 		if (!this.presumableFinishers.contains(inhabitant)) {
 			this.presumableFinishers.add(inhabitant);
 		}
+	}
+
+	public static String getCSVFields() {
+		return String.join(",", Arrays.asList("taskID", "name", "description", "createDate", "period", "nextDueDate",
+				"presumableFinishers", "whenToFinish", "rooms"));
+	}
+
+	/**
+	 * To CSV string.
+	 *
+	 * @return the string
+	 */
+	public String toCSVString() {
+		StringBuilder sb = new StringBuilder(128);
+		sb.append(this.taskID.ID.toString() + ",");
+		sb.append(this.name + ",");
+		if (this.description != null) {
+			sb.append(this.description);
+		}
+		sb.append(",");
+		sb.append(this.createDate.toString() + ",");
+		sb.append(this.period.toString() + ",");
+		sb.append(this.nextDueDate.toString() + ",");
+		if (this.presumableFinishers != null) {
+			sb.append(this.presumableFinishers.stream()
+					.map(Inhabitant::getName)
+					.collect(Collectors.joining("/"))
+					.toString());
+		}
+		sb.append(",");
+		sb.append(this.whenToFinish.toString() + ",");
+		if (this.rooms != null) {
+			sb.append(this.rooms.stream()
+					.map(Room::name)
+					.collect(Collectors.joining("/"))
+					.toString());
+		}
+		sb.append(",");
+		return sb.toString();
+	}
+
+	public JPanel getPanel() {
+		JPanel panel = new JPanel();
+		panel.add(new JLabel(this.name));
+		return panel;
 	}
 
 	@Override

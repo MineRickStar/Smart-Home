@@ -10,7 +10,7 @@ import java.util.UUID;
 public class TaskID {
 
 	/** The id. */
-	private UUID ID;
+	public final UUID ID;
 
 	/**
 	 * Instantiates a new task ID.
@@ -23,6 +23,21 @@ public class TaskID {
 
 	public static TaskID getRandomID() {
 		return new TaskID(UUID.randomUUID());
+	}
+
+	/**
+	 * Returns a new TaskID from the given String.
+	 *
+	 * @param ID the id
+	 * @return the task ID
+	 */
+	public static TaskID of(String ID) {
+		return new TaskID(UUID.fromString(ID));
+	}
+
+	@Override
+	public String toString() {
+		return this.ID.toString();
 	}
 
 	@Override

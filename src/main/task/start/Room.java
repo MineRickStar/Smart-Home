@@ -20,7 +20,7 @@ public enum Room {
 	/** The vorratsraum. */
 	VORRATSRAUM(Floor.KELLER, "Vorratsraum", "Alle Vorräte"),
 	/** The treppenstauraum. */
-	TREPPENSTAURAUM(Floor.KELLER, "Stauraum unter der Treppe"),
+	TREPPENSTAURAUM(Floor.KELLER, "Stauraum unter Treppe"),
 	/** The kellerflur. */
 	KELLERFLUR(Floor.KELLER, "Flur im Keller"),
 

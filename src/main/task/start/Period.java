@@ -16,7 +16,9 @@ public enum Period {
 	/** The each weekend. */
 	EACH_WEEKEND("Jede Wochenende", java.time.Period.ofDays(7)),
 	/** The each month. */
-	EACH_MONTH("Jeden Monat", java.time.Period.ofMonths(1)),;
+	EACH_MONTH("Jeden Monat", java.time.Period.ofMonths(1)),
+	/** The once. */
+	ONCE("Einmalig", null),;
 
 	/** The name. */
 	private String name;

@@ -3,13 +3,17 @@ package gui.view;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.ParallelGroup;
@@ -23,25 +27,22 @@ import javax.swing.Spring;
 import javax.swing.SpringLayout;
 
 import gui.BackgroundPanel;
+import gui.BackgroundPanel.View;
 import start.Period;
 import start.Room;
 import start.Task;
 import start.TaskHandler;
 import start.Time;
-import utils.Background;
 
 /**
- * The Class ViewTask.
+ * The Class ViewTaskAdd.
  *
  * @author MineRickStar
  */
-public class ViewTask extends AbstractView {
+public class ViewTaskAdd extends AbstractView {
 
 	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1967061927909870401L;
-
-	/** The layout. */
-	private SpringLayout layout;
 
 	/** The nameLabel. */
 	private JLabel nameLabel;
@@ -49,14 +50,14 @@ public class ViewTask extends AbstractView {
 	/** The nameLabel field. */
 	private JTextField nameField;
 
-	/** The description. */
-	private JLabel description;
+	/** The descriptionLabel. */
+	private JLabel descriptionLabel;
 
 	/** The descriptionArea. */
 	private JTextArea descriptionArea;
 
-	/** The periodLabel. */
-	private JLabel periodLabel;
+	/** The days. */
+	private List<JButton> days;
 
 	/** The periods. */
 	private List<JButton> periods;
@@ -67,6 +68,9 @@ public class ViewTask extends AbstractView {
 	/** The rooms. */
 	private List<JButton> rooms;
 
+	/** The back. */
+	private JButton back;
+
 	/** The ok. */
 	private JButton ok;
 
@@ -75,10 +79,8 @@ public class ViewTask extends AbstractView {
 	 *
 	 * @param parent the parent
 	 */
-	public ViewTask(BackgroundPanel parent) {
-		super(parent, Background.load("Slim Black Screen.jpg"));
-		this.layout = new SpringLayout();
-		this.setLayout(this.layout);
+	public ViewTaskAdd(BackgroundPanel parent) {
+		super(parent, "Slim Black Screen.jpg");
 		this.initButtons();
 		this.addButtons();
 
@@ -98,13 +100,38 @@ public class ViewTask extends AbstractView {
 		this.nameField = new JTextField(15);
 		this.nameField.setBorder(null);
 
-		this.description = new JLabel("Beschreibung:");
-		this.description.setForeground(Color.WHITE);
+		this.descriptionLabel = new JLabel("Beschreibung:");
+		this.descriptionLabel.setForeground(Color.WHITE);
 
 		this.descriptionArea = new JTextArea(3, 15);
 
-		this.periodLabel = new JLabel("Wiederholung:");
-		this.periodLabel.setForeground(Color.WHITE);
+		this.days = IntStream.range(0, 35)
+				.boxed()
+				.map(i -> {
+					JButton button = new JButton(LocalDateTime.now()
+							.plusDays(i)
+							.format(this.buttonFormatter));
+					button.setActionCommand(i.toString());
+					if (i == 0) {
+						button.setBackground(Color.GREEN);
+					} else {
+						button.setBackground(Color.BLUE);
+					}
+					button.addActionListener(e -> {
+						JButton source = (JButton) e.getSource();
+						this.days.forEach(dayButton -> {
+							if (dayButton.equals(source)) {
+								dayButton.setBackground(Color.GREEN);
+								this.start = LocalDateTime.now()
+										.plusDays(Integer.parseInt(source.getActionCommand()));
+							} else {
+								dayButton.setBackground(Color.BLUE);
+							}
+						});
+					});
+					return button;
+				})
+				.collect(Collectors.toList());
 
 		this.periods = Arrays.stream(Period.values())
 				.map(p -> new JButton(p.getName()))
@@ -123,15 +150,23 @@ public class ViewTask extends AbstractView {
 				.peek(b -> b.setBackground(Color.BLUE))
 				.collect(Collectors.toList());
 
+		this.back = new JButton("Zurück");
+
+		this.back.addActionListener(e -> this.parent.changeView(View.DEFAULT));
+
 		this.ok = new JButton("OK");
 
 		this.ok.addActionListener(e -> {
 			String name = this.nameField.getText();
 			String description = this.descriptionArea.getText();
+			if (name.isBlank() && description.isBlank() && this.selectedRooms.isEmpty()) { return; }
 
 			Task task = TaskHandler.getInstance()
-					.createTask(name, null, this.period.getJavaPeriod(), this.selectedRooms);
+					.createTask(name, this.start, this.period.getJavaPeriod(), this.time, this.selectedRooms);
 			task.addDescription(description);
+			this.parent.changeView(View.DEFAULT);
+			TaskHandler.getInstance()
+					.writeCSV();
 		});
 	}
 
@@ -139,55 +174,50 @@ public class ViewTask extends AbstractView {
 	 * Adds the buttons.
 	 */
 	private void addButtons() {
-
-		this.layout.putConstraint(SpringLayout.WEST, this.nameLabel, 630, SpringLayout.WEST, this);
+		// BackButton
+		this.addBackButton();
+		// NameLabel
+		this.layout.putConstraint(SpringLayout.WEST, this.nameLabel, 500, SpringLayout.WEST, this);
 		this.layout.putConstraint(SpringLayout.NORTH, this.nameLabel, 320, SpringLayout.NORTH, this);
-
 		this.add(this.nameLabel);
-
-		this.layout.putConstraint(SpringLayout.WEST, this.nameField, 80, SpringLayout.EAST, this.nameLabel);
-		this.layout.putConstraint(SpringLayout.NORTH, this.nameField, 0, SpringLayout.NORTH, this.nameLabel);
-
-		this.add(this.nameField);
-
-		this.layout.putConstraint(SpringLayout.WEST, this.description, 0, SpringLayout.WEST, this.nameLabel);
-		this.layout.putConstraint(SpringLayout.NORTH, this.description, 10, SpringLayout.SOUTH, this.nameLabel);
-
-		this.add(this.description);
-
+		// DescriptionLabel
+		this.layout.putConstraint(SpringLayout.WEST, this.descriptionLabel, 0, SpringLayout.WEST, this.nameLabel);
+		this.layout.putConstraint(SpringLayout.NORTH, this.descriptionLabel, 10, SpringLayout.SOUTH, this.nameLabel);
+		this.add(this.descriptionLabel);
+		// StartDateButtons
 		JPanel startDate = this.createStartDatePanel();
-
-		this.layout.putConstraint(SpringLayout.WEST, startDate, 0, SpringLayout.WEST, this.description);
-		this.layout.putConstraint(SpringLayout.EAST, startDate, 0, SpringLayout.EAST, this.descriptionArea);
+		this.layout.putConstraint(SpringLayout.WEST, startDate, 0, SpringLayout.WEST, this.nameLabel);
 		this.layout.putConstraint(SpringLayout.NORTH, startDate, 10, SpringLayout.SOUTH, this.descriptionArea);
-
 		this.add(startDate);
-
-		this.layout.putConstraint(SpringLayout.WEST, this.descriptionArea, 0, SpringLayout.WEST, this.nameField);
-		this.layout.putConstraint(SpringLayout.NORTH, this.descriptionArea, 0, SpringLayout.NORTH, this.description);
-
+		// NameField
+		this.layout.putConstraint(SpringLayout.WEST, this.nameField, Spring.constant(0, 0, Short.MAX_VALUE),
+				SpringLayout.EAST, this.nameLabel);
+		this.layout.putConstraint(SpringLayout.WEST, this.nameField, 0, SpringLayout.WEST, this.descriptionArea);
+		this.layout.putConstraint(SpringLayout.EAST, this.nameField, 0, SpringLayout.EAST, startDate);
+		this.layout.putConstraint(SpringLayout.NORTH, this.nameField, 0, SpringLayout.NORTH, this.nameLabel);
+		this.add(this.nameField);
+		// DescriptionArea
+		this.layout.putConstraint(SpringLayout.WEST, this.descriptionArea, Spring.constant(10, 10, Short.MAX_VALUE),
+				SpringLayout.EAST, this.descriptionLabel);
+		this.layout.putConstraint(SpringLayout.EAST, this.descriptionArea, 0, SpringLayout.EAST, startDate);
+		this.layout.putConstraint(SpringLayout.NORTH, this.descriptionArea, 0, SpringLayout.NORTH,
+				this.descriptionLabel);
 		this.add(this.descriptionArea);
-
+		// DatesAndTimesInfo
 		JPanel datesAndTimes = this.createDatesAndTimesPanel();
-
-		this.layout.putConstraint(SpringLayout.WEST, datesAndTimes, 40, SpringLayout.EAST, this.nameField);
+		this.layout.putConstraint(SpringLayout.WEST, datesAndTimes, 40, SpringLayout.EAST, startDate);
 		this.layout.putConstraint(SpringLayout.NORTH, datesAndTimes, 0, SpringLayout.NORTH, this.nameField);
-
 		this.add(datesAndTimes);
-
-		this.layout.putConstraint(SpringLayout.WEST, this.periodLabel, 0, SpringLayout.WEST, datesAndTimes);
-		this.layout.putConstraint(SpringLayout.SOUTH, this.periodLabel, Spring.constant(-20), SpringLayout.NORTH,
-				datesAndTimes);
-
-		this.add(this.periodLabel);
-
+		// OK Button
 		this.layout.putConstraint(SpringLayout.SOUTH, this.ok, -50, SpringLayout.NORTH, this.nameLabel);
 		this.layout.putConstraint(SpringLayout.WEST, this.ok, 0, SpringLayout.WEST, this.nameLabel);
 		this.layout.putConstraint(SpringLayout.EAST, this.ok, 0, SpringLayout.EAST, this.nameField);
-
 		this.add(this.ok);
 
 	}
+
+	/** The button formatter. */
+	private final DateTimeFormatter buttonFormatter = DateTimeFormatter.ofPattern("dd.MM");
 
 	/**
 	 * Creates the start date panel.
@@ -196,17 +226,20 @@ public class ViewTask extends AbstractView {
 	 */
 	private JPanel createStartDatePanel() {
 		JPanel startDate = new JPanel();
-		startDate.setLayout(new GridLayout(5, 7, 10, 10));
+		startDate.setLayout(new GridLayout(6, 7, 10, 10));
 
-		Calendar calendar = Calendar.getInstance();
-		int week = calendar.get(Calendar.WEEK_OF_YEAR);
+		DayOfWeek day = LocalDate.now()
+				.getDayOfWeek();
 
-		LocalDateTime addDate = LocalDateTime.now();
-		for (int i = 0; i < 35; i++) {
-			// TODO
-			startDate.add(new JButton(addDate.format(DateTimeFormatter.ofPattern("dd.MM"))));
-			addDate = addDate.plusDays(1);
-		}
+		Arrays.stream(DayOfWeek.values())
+				.forEach(s -> {
+					JLabel label = new JLabel(s.plus(day.getValue() - 1)
+							.getDisplayName(TextStyle.SHORT, Locale.getDefault()));
+					label.setForeground(Color.WHITE);
+					startDate.add(label);
+				});
+
+		this.days.forEach(startDate::add);
 
 		startDate.setOpaque(false);
 
@@ -325,6 +358,9 @@ public class ViewTask extends AbstractView {
 
 	/** The time. */
 	private Time time = Time.AT_THE_DAY;
+
+	/** The start. */
+	private LocalDateTime start = LocalDateTime.now();
 
 	/** The selected rooms. */
 	private ArrayList<Room> selectedRooms = new ArrayList<>();

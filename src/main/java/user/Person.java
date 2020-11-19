@@ -1,11 +1,44 @@
 package user;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * The Class Person.
  *
  * @author MineRickStar
  */
 public class Person {
+
+	/** The Constant persons. */
+	public static final List<Person> persons;
+
+	static {
+		persons = new ArrayList<>();
+		Person.persons.add(new Inhabitant("Patrick"));
+		Person.persons.add(new Inhabitant("Nicolette"));
+		Person.persons.add(new Inhabitant("Thomas"));
+
+	}
+
+	/**
+	 * Adds the person.
+	 *
+	 * @param person the person
+	 */
+	public static void addPerson(Person person) {
+		if (!Person.persons.contains(person)) {
+			Person.persons.add(person);
+		}
+	}
+
+	public static List<Inhabitant> getInhabitants() {
+		return Person.persons.stream()
+				.filter(p -> p instanceof Inhabitant)
+				.map(p -> (Inhabitant) p)
+				.collect(Collectors.toList());
+	}
 
 	/** The person ID. */
 	private final PersonID personID;
