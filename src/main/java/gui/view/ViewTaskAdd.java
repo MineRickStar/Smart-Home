@@ -159,7 +159,9 @@ public class ViewTaskAdd extends AbstractView {
 		this.ok.addActionListener(e -> {
 			String name = this.nameField.getText();
 			String description = this.descriptionArea.getText();
-			if (name.isBlank() && description.isBlank() && this.selectedRooms.isEmpty()) { return; }
+			if (name.isBlank() && description.isBlank() && this.selectedRooms.isEmpty()) {
+				return;
+			}
 
 			Task task = TaskHandler.getInstance()
 					.createTask(name, this.start, this.period.getJavaPeriod(), this.time, this.selectedRooms);

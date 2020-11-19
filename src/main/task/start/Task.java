@@ -1,7 +1,9 @@
 package start;
 
+import java.awt.GridLayout;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -195,16 +197,58 @@ public class Task {
 		return sb.toString();
 	}
 
+	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.YYYY");
+
+	public static JPanel getLabelPanel() {
+		JPanel panel = new JPanel(new GridLayout(0, 7, 10, 10));
+		// Top row
+		panel.add(new JLabel("Name"));
+		panel.add(new JLabel("Beschreibung"));
+		panel.add(new JLabel("Erstelldatum"));
+		panel.add(new JLabel("Periode"));
+		panel.add(new JLabel("Nächstes mal fällig"));
+		panel.add(new JLabel("Wer ist als nächstes dran"));
+		panel.add(new JLabel("Räume"));
+		return panel;
+	}
+
 	public JPanel getPanel() {
-		JPanel panel = new JPanel();
+		JPanel panel = new JPanel(new GridLayout(0, 7, 10, 10));
+		// Value row
 		panel.add(new JLabel(this.name));
+		panel.add(new JLabel(this.description));
+		panel.add(new JLabel(this.createDate.format(Task.formatter)));
+		panel.add(new JLabel(this.period.toString()));
+		panel.add(new JLabel(this.nextDueDate.format(Task.formatter)));
+		if ((this.presumableFinishers == null) || this.presumableFinishers.isEmpty()) {
+			panel.add(new JLabel());
+		} else {
+			JPanel finisherPanel = new JPanel(new GridLayout(this.presumableFinishers.size(), 0));
+			this.presumableFinishers.stream()
+					.map(i -> new JLabel(i.getName()))
+					.forEach(finisherPanel::add);
+			panel.add(finisherPanel);
+		}
+		if ((this.rooms == null) || this.rooms.isEmpty()) {
+			panel.add(new JLabel());
+		} else {
+			JPanel roomPanel = new JPanel(new GridLayout(this.rooms.size(), 0));
+			this.rooms.stream()
+					.map(r -> new JLabel(r.getName()))
+					.forEach(roomPanel::add);
+			panel.add(roomPanel);
+		}
 		return panel;
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) { return true; }
-		if (o instanceof Task) { return this.taskID.equals(((Task) o).taskID); }
+		if (this == o) {
+			return true;
+		}
+		if (o instanceof Task) {
+			return this.taskID.equals(((Task) o).taskID);
+		}
 		return false;
 	}
 

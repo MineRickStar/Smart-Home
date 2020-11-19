@@ -145,12 +145,16 @@ public class ViewTasks extends AbstractView {
 		ParallelGroup horizontalGroup = layout.createParallelGroup(GroupLayout.Alignment.LEADING);
 		SequentialGroup verticalGroup = layout.createSequentialGroup();
 
+		JPanel labelPanel = Task.getLabelPanel();
+		horizontalGroup.addComponent(labelPanel);
+		verticalGroup.addComponent(labelPanel);
+		verticalGroup.addGap(40, 40, Short.MAX_VALUE);
+
 		tasks.stream()
-				.map(task -> task.getPanel())
+				.map(Task::getPanel)
 				.forEach(panel -> {
 					horizontalGroup.addComponent(panel);
 					verticalGroup.addComponent(panel);
-					verticalGroup.addGap(40, 40, Short.MAX_VALUE);
 				});
 
 		layout.setVerticalGroup(verticalGroup);
