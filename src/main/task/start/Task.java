@@ -2,7 +2,6 @@ package start;
 
 import java.awt.GridLayout;
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +17,7 @@ import user.Inhabitant;
 /**
  * The Class Task.
  */
-public class Task {
+public class Task implements Comparable<Task> {
 
 	/** The task ID. */
 	private final TaskID taskID;
@@ -38,8 +37,8 @@ public class Task {
 	/** The next due date. */
 	private LocalDateTime nextDueDate;
 
-	/** The presumable finisher. */
-	private List<Inhabitant> presumableFinishers;
+	/** The task for them. */
+	private List<Inhabitant> suitableFor;
 
 	/** The finished. */
 	private final HashMap<Inhabitant, List<LocalDateTime>> finished;
@@ -64,8 +63,8 @@ public class Task {
 		this.period = Period.parse(fields[4]);
 		this.nextDueDate = LocalDateTime.parse(fields[5]);
 		if (!fields[6].isEmpty()) {
-			this.presumableFinishers = Arrays.stream(fields[6].split("/"))
-					.map(Inhabitant::new)
+			this.suitableFor = Arrays.stream(fields[6].split("/"))
+					.map(Inhabitant::getInhabitantFromName)
 					.collect(Collectors.toList());
 		}
 		this.finished = new HashMap<>();
@@ -85,10 +84,8 @@ public class Task {
 	 * @param nextDueDate  the next due date
 	 * @param period       the period
 	 * @param whenToFinish the when to finish
-	 * @param rooms        the rooms
 	 */
-	public Task(String name, LocalDateTime createDate, LocalDateTime nextDueDate, Period period, Time whenToFinish,
-			ArrayList<Room> rooms) {
+	public Task(String name, LocalDateTime createDate, LocalDateTime nextDueDate, Period period, Time whenToFinish) {
 		this.taskID = TaskID.getRandomID();
 		this.name = name;
 		this.createDate = createDate;
@@ -96,7 +93,7 @@ public class Task {
 		this.period = period;
 		this.whenToFinish = whenToFinish;
 		this.finished = new HashMap<>();
-		this.rooms = rooms;
+		this.suitableFor = new ArrayList<>();
 	}
 
 	/**
@@ -110,6 +107,15 @@ public class Task {
 
 	public String getDescription() {
 		return this.description;
+	}
+
+	/**
+	 * Adds the rooms.
+	 *
+	 * @param rooms the rooms
+	 */
+	public void addRooms(List<Room> rooms) {
+		this.rooms = rooms;
 	}
 
 	/**
@@ -127,24 +133,24 @@ public class Task {
 				return v;
 			}
 		});
-		this.nextDueDate = when.plus(this.period);
+		this.nextDueDate = when.plus(this.period.getJavaPeriod());
 	}
 
 	public LocalDateTime getNextDueDate() {
 		return this.nextDueDate;
 	}
 
-	public List<Inhabitant> getPresumableFinishers() {
-		return this.presumableFinishers;
+	/**
+	 * Adds the presumable finisher.
+	 *
+	 * @param finisher the finisher
+	 */
+	public void addTaskForThem(List<Inhabitant> finisher) {
+		finisher.forEach(this::addTaskForThem);
 	}
 
-	/**
-	 * Removes the presumable finisher.
-	 *
-	 * @param inhabitant the inhabitant
-	 */
-	public void removePresumableFinisher(Inhabitant inhabitant) {
-		this.presumableFinishers.remove(inhabitant);
+	public List<Inhabitant> getTaskForThem() {
+		return this.suitableFor;
 	}
 
 	/**
@@ -152,15 +158,15 @@ public class Task {
 	 *
 	 * @param inhabitant the inhabitant
 	 */
-	public void addPresumableFinisher(Inhabitant inhabitant) {
-		if (!this.presumableFinishers.contains(inhabitant)) {
-			this.presumableFinishers.add(inhabitant);
+	public void addTaskForThem(Inhabitant inhabitant) {
+		if (!this.suitableFor.contains(inhabitant)) {
+			this.suitableFor.add(inhabitant);
 		}
 	}
 
 	public static String getCSVFields() {
 		return String.join(",", Arrays.asList("taskID", "name", "description", "createDate", "period", "nextDueDate",
-				"presumableFinishers", "whenToFinish", "rooms"));
+				"suitableFor", "whenToFinish", "rooms"));
 	}
 
 	/**
@@ -179,8 +185,8 @@ public class Task {
 		sb.append(this.createDate.toString() + ",");
 		sb.append(this.period.toString() + ",");
 		sb.append(this.nextDueDate.toString() + ",");
-		if (this.presumableFinishers != null) {
-			sb.append(this.presumableFinishers.stream()
+		if (this.suitableFor != null) {
+			sb.append(this.suitableFor.stream()
 					.map(Inhabitant::getName)
 					.collect(Collectors.joining("/"))
 					.toString());
@@ -197,6 +203,7 @@ public class Task {
 		return sb.toString();
 	}
 
+	/** The Constant formatter. */
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.YYYY");
 
 	public static JPanel getLabelPanel() {
@@ -207,7 +214,7 @@ public class Task {
 		panel.add(new JLabel("Erstelldatum"));
 		panel.add(new JLabel("Periode"));
 		panel.add(new JLabel("Nächstes mal fällig"));
-		panel.add(new JLabel("Wer ist als nächstes dran"));
+		panel.add(new JLabel("Für wen"));
 		panel.add(new JLabel("Räume"));
 		return panel;
 	}
@@ -220,14 +227,14 @@ public class Task {
 		panel.add(new JLabel(this.createDate.format(Task.formatter)));
 		panel.add(new JLabel(this.period.toString()));
 		panel.add(new JLabel(this.nextDueDate.format(Task.formatter)));
-		if ((this.presumableFinishers == null) || this.presumableFinishers.isEmpty()) {
+		if ((this.suitableFor == null) || this.suitableFor.isEmpty()) {
 			panel.add(new JLabel());
 		} else {
-			JPanel finisherPanel = new JPanel(new GridLayout(this.presumableFinishers.size(), 0));
-			this.presumableFinishers.stream()
+			JPanel taskForThemPanel = new JPanel(new GridLayout(this.suitableFor.size(), 0));
+			this.suitableFor.stream()
 					.map(i -> new JLabel(i.getName()))
-					.forEach(finisherPanel::add);
-			panel.add(finisherPanel);
+					.forEach(taskForThemPanel::add);
+			panel.add(taskForThemPanel);
 		}
 		if ((this.rooms == null) || this.rooms.isEmpty()) {
 			panel.add(new JLabel());
@@ -243,17 +250,18 @@ public class Task {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o instanceof Task) {
-			return this.taskID.equals(((Task) o).taskID);
-		}
+		if (this == o) { return true; }
+		if (o instanceof Task) { return this.taskID.equals(((Task) o).taskID); }
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
 		return this.taskID.hashCode();
+	}
+
+	@Override
+	public int compareTo(Task o) {
+		return this.nextDueDate.compareTo(o.nextDueDate);
 	}
 }

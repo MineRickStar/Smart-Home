@@ -1,5 +1,7 @@
 package start;
 
+import java.util.Arrays;
+
 /**
  * The Class Period.
  *
@@ -11,10 +13,10 @@ public enum Period {
 	EVERY_DAY("Jeden Tag", java.time.Period.ofDays(1)),
 	/** The every 2 day. */
 	EVERY_2_DAY("Jeden 2 Tag", java.time.Period.ofDays(2)),
-	/** The Constant EACH_WEEK. */
+	/** The each week. */
 	EACH_WEEK("Jede Woche", java.time.Period.ofDays(7)),
 	/** The each weekend. */
-	EACH_WEEKEND("Jede Wochenende", java.time.Period.ofDays(7)),
+	EACH_WEEKEND("Jedes Wochenende", java.time.Period.ofDays(7)),
 	/** The each month. */
 	EACH_MONTH("Jeden Monat", java.time.Period.ofMonths(1)),
 	/** The once. */
@@ -43,6 +45,25 @@ public enum Period {
 
 	public java.time.Period getJavaPeriod() {
 		return this.period;
+	}
+
+	/**
+	 * Parses the period.
+	 *
+	 * @param period the period
+	 * @return the period
+	 */
+	public static Period parse(String period) {
+		return Arrays.stream(Period.values())
+				.filter(p -> p.getName()
+						.equals(period))
+				.findAny()
+				.orElse(EACH_WEEK);
+	}
+
+	@Override
+	public String toString() {
+		return this.name;
 	}
 
 }

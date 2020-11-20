@@ -1,6 +1,7 @@
 package gui.view;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.GroupLayout;
@@ -11,10 +12,10 @@ import javax.swing.JPanel;
 import javax.swing.SpringLayout;
 
 import gui.BackgroundPanel;
+import gui.BackgroundPanel.View;
 import start.Task;
 import start.TaskHandler;
 import user.Inhabitant;
-import user.Person;
 
 /**
  * The Class ViewTasks.
@@ -33,7 +34,7 @@ public class ViewTasks extends AbstractView {
 	private final JPanel choosePanel;
 
 	/** The task panel. */
-	private final JPanel taskPanel;
+	private JPanel taskPanel;
 
 	/**
 	 * View task.
@@ -44,11 +45,10 @@ public class ViewTasks extends AbstractView {
 		super(parent, "Star Trek.png");
 		this.inhabitantsToChooseAndAllTasks = new ArrayList<>();
 		this.initButtons();
-		this.choosePanel = new JPanel();
-		this.createChoosePanel();
-		this.taskPanel = new JPanel();
+		this.choosePanel = this.createChoosePanel();
+		this.addLayout();
+		this.add(this.choosePanel);
 		this.addBackButton();
-		this.addButtons();
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class ViewTasks extends AbstractView {
 		JButton allTasks = new JButton("Alle Aufgaben");
 		allTasks.addActionListener(e -> this.changeViewToInhabitant(null));
 		this.inhabitantsToChooseAndAllTasks.add(allTasks);
-		Person.getInhabitants()
+		Arrays.asList(Inhabitant.values())
 				.forEach(i -> {
 					JButton b = new JButton(i.getName());
 					b.addActionListener(e -> this.changeViewToInhabitant(i));
@@ -67,13 +67,11 @@ public class ViewTasks extends AbstractView {
 	}
 
 	/**
-	 * Adds the buttons.
+	 * Adds the layout.
 	 */
-	private void addButtons() {
+	private void addLayout() {
 		this.layout.putConstraint(SpringLayout.WEST, this.choosePanel, 200, SpringLayout.WEST, this);
 		this.layout.putConstraint(SpringLayout.NORTH, this.choosePanel, 200, SpringLayout.NORTH, this);
-
-		this.add(this.choosePanel);
 	}
 
 	/**
@@ -81,14 +79,15 @@ public class ViewTasks extends AbstractView {
 	 *
 	 * @return the j panel
 	 */
-	private void createChoosePanel() {
-		GroupLayout layout = new GroupLayout(this.choosePanel);
+	private JPanel createChoosePanel() {
+		JPanel panel = new JPanel();
+		GroupLayout layout = new GroupLayout(panel);
 
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
 
-		this.choosePanel.setLayout(layout);
-		this.choosePanel.setOpaque(false);
+		panel.setLayout(layout);
+		panel.setOpaque(false);
 
 		layout.linkSize(this.inhabitantsToChooseAndAllTasks.toArray(JButton[]::new));
 
@@ -96,12 +95,14 @@ public class ViewTasks extends AbstractView {
 		SequentialGroup verticalGroup = layout.createSequentialGroup();
 		this.inhabitantsToChooseAndAllTasks.forEach(b -> {
 			horizontalGroup.addComponent(b);
-			verticalGroup.addComponent(b);
-			verticalGroup.addGap(40, 40, Short.MAX_VALUE);
+			verticalGroup.addComponent(b)
+					.addGap(40);
 		});
 
 		layout.setVerticalGroup(verticalGroup);
 		layout.setHorizontalGroup(horizontalGroup);
+
+		return panel;
 	}
 
 	/**
@@ -110,8 +111,14 @@ public class ViewTasks extends AbstractView {
 	 * @param inhabitant the inhabitant
 	 */
 	private void changeViewToInhabitant(Inhabitant inhabitant) {
-		this.remove(this.backButton);
-		this.remove(this.choosePanel);
+		this.changeBackListener(e -> {
+			this.remove(this.taskPanel);
+			this.choosePanel.setVisible(true);
+			this.changeBackview(View.DEFAULT);
+			this.revalidate();
+			this.repaint();
+		});
+		this.choosePanel.setVisible(false);
 		List<Task> tasks;
 		if (inhabitant == null) {
 			tasks = TaskHandler.getInstance()
@@ -120,9 +127,10 @@ public class ViewTasks extends AbstractView {
 			tasks = TaskHandler.getInstance()
 					.getTasksFor(inhabitant);
 		}
-		this.createTaskPanel(tasks);
-		this.layout.putConstraint(SpringLayout.WEST, this.taskPanel, 200, SpringLayout.WEST, this);
-		this.layout.putConstraint(SpringLayout.NORTH, this.taskPanel, 200, SpringLayout.NORTH, this);
+		this.taskPanel = this.createTaskPanel(tasks);
+
+		this.layout.putConstraint(SpringLayout.WEST, this.taskPanel, 100, SpringLayout.WEST, this);
+		this.layout.putConstraint(SpringLayout.NORTH, this.taskPanel, 150, SpringLayout.NORTH, this);
 		this.add(this.taskPanel);
 		this.revalidate();
 		this.repaint();
@@ -132,15 +140,17 @@ public class ViewTasks extends AbstractView {
 	 * Creates the task panel.
 	 *
 	 * @param tasks the tasks
+	 * @return the j panel
 	 */
-	private void createTaskPanel(List<Task> tasks) {
-		GroupLayout layout = new GroupLayout(this.taskPanel);
+	private JPanel createTaskPanel(List<Task> tasks) {
+		JPanel panel = new JPanel();
+		GroupLayout layout = new GroupLayout(panel);
 
 		layout.setAutoCreateGaps(true);
 		layout.setAutoCreateContainerGaps(true);
 
-		this.taskPanel.setLayout(layout);
-		this.taskPanel.setOpaque(false);
+		panel.setLayout(layout);
+		panel.setOpaque(false);
 
 		ParallelGroup horizontalGroup = layout.createParallelGroup(GroupLayout.Alignment.LEADING);
 		SequentialGroup verticalGroup = layout.createSequentialGroup();
@@ -151,14 +161,18 @@ public class ViewTasks extends AbstractView {
 		verticalGroup.addGap(40, 40, Short.MAX_VALUE);
 
 		tasks.stream()
+				.sorted()
 				.map(Task::getPanel)
-				.forEach(panel -> {
-					horizontalGroup.addComponent(panel);
-					verticalGroup.addComponent(panel);
+				.forEach(panel0 -> {
+					horizontalGroup.addComponent(panel0);
+					verticalGroup.addComponent(panel0)
+							.addGap(20);
 				});
 
 		layout.setVerticalGroup(verticalGroup);
 		layout.setHorizontalGroup(horizontalGroup);
+
+		return panel;
 	}
 
 }

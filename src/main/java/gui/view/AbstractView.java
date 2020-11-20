@@ -1,6 +1,7 @@
 package gui.view;
 
 import java.awt.Image;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -32,8 +33,8 @@ public abstract class AbstractView extends JPanel {
 	/** The back button. */
 	protected final JButton backButton;
 
-	/** The backview. */
-	private View backview;
+	/** The back button listener. */
+	private ActionListener backButtonListener;
 
 	/**
 	 * Instantiates a new abstract view.
@@ -50,6 +51,35 @@ public abstract class AbstractView extends JPanel {
 		this.setLayout(this.layout);
 		this.setOpaque(false);
 		this.backButton = new JButton("Zurück");
+	}
+
+	/**
+	 * Adds the back button.
+	 *
+	 * @param distance the distance
+	 */
+	protected final void addBackButton(int distance) {
+		this.addBackButton(View.DEFAULT, this.NORTH_WEST, distance);
+	}
+
+	/**
+	 * Adds the back button.
+	 */
+	protected final void addBackButton() {
+		this.addBackButton(View.DEFAULT, this.NORTH_WEST, 70);
+	}
+
+	/**
+	 * Adds the back button.
+	 *
+	 * @param backview the backview
+	 * @param corner   the corner
+	 * @param distance the distance
+	 */
+	protected final void addBackButton(View backview, int corner, int distance) {
+		this.changeBackview(backview);
+		this.layoutButton(corner, distance);
+		this.add(this.backButton);
 	}
 
 	/** The north. */
@@ -71,15 +101,13 @@ public abstract class AbstractView extends JPanel {
 	protected final int SOUTH_WEST = this.SOUTH | this.WEST;
 
 	/**
-	 * Adds the back button.
+	 * Layout button.
 	 *
-	 * @param backview the backview
 	 * @param corner   the corner
 	 * @param distance the distance
 	 */
-	protected final void addBackButton(View backview, int corner, int distance) {
-		this.backview = backview;
-		this.backButton.addActionListener(e -> this.parent.changeView(this.backview));
+	protected final void layoutButton(int corner, int distance) {
+		this.layout.removeLayoutComponent(this.backButton);
 		if ((corner & this.NORTH) == this.NORTH) {
 			this.layout.putConstraint(SpringLayout.NORTH, this.backButton, distance, SpringLayout.NORTH, this);
 		}
@@ -92,23 +120,6 @@ public abstract class AbstractView extends JPanel {
 		if ((corner & this.WEST) == this.WEST) {
 			this.layout.putConstraint(SpringLayout.WEST, this.backButton, distance, SpringLayout.WEST, this);
 		}
-		this.add(this.backButton);
-	}
-
-	/**
-	 * Adds the back button.
-	 *
-	 * @param distance the distance
-	 */
-	protected final void addBackButton(int distance) {
-		this.addBackButton(View.DEFAULT, this.NORTH_WEST, distance);
-	}
-
-	/**
-	 * Adds the back button.
-	 */
-	protected final void addBackButton() {
-		this.addBackButton(View.DEFAULT, this.NORTH_WEST, 70);
 	}
 
 	/**
@@ -117,7 +128,20 @@ public abstract class AbstractView extends JPanel {
 	 * @param backview the backview
 	 */
 	protected final void changeBackview(View backview) {
-		this.backview = backview;
+		this.changeBackListener(e -> this.parent.changeView(backview));
+	}
+
+	/**
+	 * Change back listener.
+	 *
+	 * @param listener the listener
+	 */
+	protected final void changeBackListener(ActionListener listener) {
+		if (this.backButtonListener != null) {
+			this.backButton.removeActionListener(this.backButtonListener);
+		}
+		this.backButtonListener = listener;
+		this.backButton.addActionListener(this.backButtonListener);
 	}
 
 }

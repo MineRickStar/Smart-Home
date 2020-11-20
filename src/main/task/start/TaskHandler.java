@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,11 +46,10 @@ public class TaskHandler {
 	 * @param nextDueDate  the next due date
 	 * @param period       the period
 	 * @param whenToFinish the when to finish
-	 * @param rooms        the rooms
 	 * @return the task
 	 */
-	public Task createTask(LocalDateTime nextDueDate, Period period, Time whenToFinish, ArrayList<Room> rooms) {
-		return this.createTask("Task-" + TaskHandler.counter++, nextDueDate, period, whenToFinish, rooms);
+	public Task createTask(LocalDateTime nextDueDate, Period period, Time whenToFinish) {
+		return this.createTask("Task-" + TaskHandler.counter++, nextDueDate, period, whenToFinish);
 	}
 
 	/**
@@ -61,12 +59,10 @@ public class TaskHandler {
 	 * @param nextDueDate  the next due date
 	 * @param period       the period
 	 * @param whenToFinish the when to finish
-	 * @param rooms        the rooms
 	 * @return the task
 	 */
-	public Task createTask(String name, LocalDateTime nextDueDate, Period period, Time whenToFinish,
-			ArrayList<Room> rooms) {
-		Task task = new Task(name, LocalDateTime.now(), nextDueDate, period, whenToFinish, rooms);
+	public Task createTask(String name, LocalDateTime nextDueDate, Period period, Time whenToFinish) {
+		Task task = new Task(name, LocalDateTime.now(), nextDueDate, period, whenToFinish);
 		this.tasks.add(task);
 		return task;
 	}
@@ -80,9 +76,9 @@ public class TaskHandler {
 	public List<Task> getTasksFor(Inhabitant inhabitant) {
 		return this.tasks.parallelStream()
 				.filter(task -> {
-					List<Inhabitant> presumableFinishers = task.getPresumableFinishers();
-					if (presumableFinishers == null) { return false; }
-					return presumableFinishers.contains(inhabitant);
+					List<Inhabitant> taskInhabitors = task.getTaskForThem();
+					if (taskInhabitors == null) { return false; }
+					return taskInhabitors.contains(inhabitant);
 				})
 				.collect(Collectors.toList());
 	}
