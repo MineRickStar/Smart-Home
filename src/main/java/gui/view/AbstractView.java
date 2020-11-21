@@ -42,9 +42,8 @@ public abstract class AbstractView extends JPanel {
 	 * @param parent     the parent
 	 * @param background the background
 	 */
-	public AbstractView(BackgroundPanel parent, String background) {
+	public AbstractView(BackgroundPanel parent) {
 		this.parent = parent;
-//		this.background = Background.load(background);
 		this.background = Background.load("Black screen.png");
 		this.parent.setBackground(this.background);
 		this.layout = new SpringLayout();
@@ -66,7 +65,7 @@ public abstract class AbstractView extends JPanel {
 	 * Adds the back button.
 	 */
 	protected final void addBackButton() {
-		this.addBackButton(View.DEFAULT, this.NORTH_WEST, 70);
+		this.addBackButton(View.DEFAULT, this.NORTH_WEST, 10);
 	}
 
 	/**

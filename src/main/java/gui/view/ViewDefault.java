@@ -28,7 +28,7 @@ public class ViewDefault extends AbstractView {
 	 * @param parent the parent
 	 */
 	public ViewDefault(BackgroundPanel parent) {
-		super(parent, "Black screen.png");
+		super(parent);
 		this.initButtons();
 		this.addButtons();
 	}

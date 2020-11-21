@@ -3,7 +3,6 @@ package gui.view;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Point;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -48,9 +47,6 @@ public class ViewTaskAdd extends AbstractView {
 	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1967061927909870401L;
 
-	/** The left corner. */
-	private final Point leftCorner = new Point(200, 320);
-
 	/** The nameLabel. */
 	private JLabel nameLabel;
 
@@ -87,7 +83,7 @@ public class ViewTaskAdd extends AbstractView {
 	 * @param parent the parent
 	 */
 	public ViewTaskAdd(BackgroundPanel parent) {
-		super(parent, "Slim Black Screen.jpg");
+		super(parent);
 		this.initButtons();
 		this.addButtons();
 
@@ -167,8 +163,10 @@ public class ViewTaskAdd extends AbstractView {
 		// BackButton
 		this.addBackButton();
 		// NameLabel
-		this.layout.putConstraint(SpringLayout.WEST, this.nameLabel, this.leftCorner.x, SpringLayout.WEST, this);
-		this.layout.putConstraint(SpringLayout.NORTH, this.nameLabel, this.leftCorner.y, SpringLayout.NORTH, this);
+		this.layout.putConstraint(SpringLayout.WEST, this.nameLabel, Spring.constant(10, 10, 50), SpringLayout.WEST,
+				this);
+		this.layout.putConstraint(SpringLayout.NORTH, this.nameLabel, Spring.constant(10, 50, 50), SpringLayout.SOUTH,
+				this.backButton);
 		this.add(this.nameLabel);
 		// DescriptionLabel
 		this.layout.putConstraint(SpringLayout.WEST, this.descriptionLabel, 0, SpringLayout.WEST, this.nameLabel);
@@ -204,8 +202,9 @@ public class ViewTaskAdd extends AbstractView {
 		this.layout.putConstraint(SpringLayout.NORTH, finisherPanel, 0, SpringLayout.NORTH, datesAndTimes);
 		this.add(finisherPanel);
 		// OK Button
-		this.layout.putConstraint(SpringLayout.SOUTH, this.ok, -50, SpringLayout.NORTH, this.nameLabel);
-		this.layout.putConstraint(SpringLayout.WEST, this.ok, 0, SpringLayout.WEST, this.nameLabel);
+		this.layout.putConstraint(SpringLayout.NORTH, this.ok, 0, SpringLayout.NORTH, this.backButton);
+		this.layout.putConstraint(SpringLayout.WEST, this.ok, Spring.constant(50, 50, 100), SpringLayout.EAST,
+				this.backButton);
 		this.layout.putConstraint(SpringLayout.EAST, this.ok, 0, SpringLayout.EAST, this.nameField);
 		this.add(this.ok);
 

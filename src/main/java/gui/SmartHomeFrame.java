@@ -48,6 +48,7 @@ public class SmartHomeFrame extends JFrame {
 		this.setTitle("Smart Home");
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 //		this.setUndecorated(true);
+		this.setAlwaysOnTop(true);
 		this.setExtendedState(Frame.MAXIMIZED_BOTH);
 		this.setMinimumSize(Display.getScreenSize());
 		this.setResizable(false);

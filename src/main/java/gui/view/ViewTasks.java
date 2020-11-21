@@ -42,7 +42,7 @@ public class ViewTasks extends AbstractView {
 	 * @param parent the parent
 	 */
 	public ViewTasks(BackgroundPanel parent) {
-		super(parent, "Star Trek.png");
+		super(parent);
 		this.inhabitantsToChooseAndAllTasks = new ArrayList<>();
 		this.initButtons();
 		this.choosePanel = this.createChoosePanel();
