@@ -1,10 +1,8 @@
 package gui;
 
-import java.awt.Font;
 import java.awt.Frame;
 
 import javax.swing.JFrame;
-import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 import gui.BackgroundPanel.View;
@@ -27,15 +25,15 @@ public class SmartHomeFrame extends JFrame {
 	 * Instantiates a new smart home frame.
 	 */
 	public SmartHomeFrame() {
-		Font font = new Font("Arial", Font.BOLD, 18);
-		UIManager.getLookAndFeelDefaults()
-				.keySet()
-				.stream()
-				.filter(o -> o.toString()
-						.toLowerCase()
-						.contains("font"))
-				.forEach(o -> UIManager.getLookAndFeelDefaults()
-						.put(o, font));
+//		Font font = new Font("Arial", Font.BOLD, 18);
+//		UIManager.getLookAndFeelDefaults()
+//				.keySet()
+//				.stream()
+//				.filter(o -> o.toString()
+//						.toLowerCase()
+//						.contains("font"))
+//				.forEach(o -> UIManager.getLookAndFeelDefaults()
+//						.put(o, font));
 		this.addBackgroundPanel();
 		this.init();
 		this.panel.changeView(View.DEFAULT);
