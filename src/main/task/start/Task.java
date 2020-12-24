@@ -43,11 +43,11 @@ public class Task implements Comparable<Task> {
 	/** The finished. */
 	private final HashMap<Inhabitant, List<LocalDateTime>> finished;
 
-	/** The when to finish. */
-	private Time whenToFinish;
-
 	/** The rooms. */
-	private List<Room> rooms;
+	private final List<Room> rooms;
+
+	/** The following tasks. */
+	private final List<Task> followingTasks;
 
 	/**
 	 * Instantiates a new task.
@@ -55,7 +55,7 @@ public class Task implements Comparable<Task> {
 	 * @param line the line
 	 */
 	Task(String line) {
-		String[] fields = line.split(",");
+		String[] fields = line.split(",", -1);
 		this.taskID = TaskID.of(fields[0]);
 		this.name = fields[1];
 		this.description = fields[2];
@@ -68,32 +68,38 @@ public class Task implements Comparable<Task> {
 					.collect(Collectors.toList());
 		}
 		this.finished = new HashMap<>();
-		this.whenToFinish = Time.valueOf(fields[7]);
+		this.rooms = new ArrayList<>();
 		if (!fields[8].isEmpty()) {
-			this.rooms = Arrays.stream(fields[8].split("/"))
+			this.rooms.addAll(Arrays.stream(fields[8].split("/"))
 					.map(Room::valueOf)
-					.collect(Collectors.toList());
+					.collect(Collectors.toList()));
+		}
+		this.followingTasks = new ArrayList<>();
+		if (!fields[9].isEmpty()) {
+			this.followingTasks.addAll(Arrays.stream(fields[9].split("/"))
+					.map(TaskHandler.getInstance()::getTaskFromID)
+					.collect(Collectors.toList()));
 		}
 	}
 
 	/**
 	 * Instantiates a new task.
 	 *
-	 * @param name         the name
-	 * @param createDate   the create date
-	 * @param nextDueDate  the next due date
-	 * @param period       the period
-	 * @param whenToFinish the when to finish
+	 * @param name        the name
+	 * @param createDate  the create date
+	 * @param nextDueDate the next due date
+	 * @param period      the period
 	 */
-	public Task(String name, LocalDateTime createDate, LocalDateTime nextDueDate, Period period, Time whenToFinish) {
+	public Task(String name, LocalDateTime createDate, LocalDateTime nextDueDate, Period period) {
 		this.taskID = TaskID.getRandomID();
 		this.name = name;
 		this.createDate = createDate;
 		this.nextDueDate = nextDueDate;
 		this.period = period;
-		this.whenToFinish = whenToFinish;
 		this.finished = new HashMap<>();
 		this.suitableFor = new ArrayList<>();
+		this.rooms = new ArrayList<>();
+		this.followingTasks = new ArrayList<>();
 	}
 
 	/**
@@ -115,7 +121,16 @@ public class Task implements Comparable<Task> {
 	 * @param rooms the rooms
 	 */
 	public void addRooms(List<Room> rooms) {
-		this.rooms = rooms;
+		this.rooms.addAll(rooms);
+	}
+
+	/**
+	 * Adds the following tasks.
+	 *
+	 * @param tasks the tasks
+	 */
+	public void addFollowingTasks(List<Task> tasks) {
+		this.followingTasks.addAll(tasks);
 	}
 
 	/**
@@ -192,10 +207,17 @@ public class Task implements Comparable<Task> {
 					.toString());
 		}
 		sb.append(",");
-		sb.append(this.whenToFinish.toString() + ",");
 		if (this.rooms != null) {
 			sb.append(this.rooms.stream()
 					.map(Room::name)
+					.collect(Collectors.joining("/"))
+					.toString());
+		}
+		sb.append(",");
+		if (this.followingTasks != null) {
+			sb.append(this.followingTasks.stream()
+					.map(t -> t.getID()
+							.toString())
 					.collect(Collectors.joining("/"))
 					.toString());
 		}
@@ -206,8 +228,11 @@ public class Task implements Comparable<Task> {
 	/** The Constant formatter. */
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.YYYY");
 
+	/** The columns. */
+	private static final int columns = 7;
+
 	public static JPanel getLabelPanel() {
-		JPanel panel = new JPanel(new GridLayout(0, 7, 10, 10));
+		JPanel panel = new JPanel(new GridLayout(0, Task.columns, 10, 10));
 		// Top row
 		panel.add(new JLabel("Name"));
 		panel.add(new JLabel("Beschreibung"));
@@ -220,7 +245,7 @@ public class Task implements Comparable<Task> {
 	}
 
 	public JPanel getPanel() {
-		JPanel panel = new JPanel(new GridLayout(0, 7, 10, 10));
+		JPanel panel = new JPanel(new GridLayout(0, Task.columns, 10, 10));
 		// Value row
 		panel.add(new JLabel(this.name));
 		panel.add(new JLabel(this.description));
@@ -241,11 +266,15 @@ public class Task implements Comparable<Task> {
 		} else {
 			JPanel roomPanel = new JPanel(new GridLayout(this.rooms.size(), 0));
 			this.rooms.stream()
-					.map(r -> new JLabel(r.getName()))
+					.map(r -> new JLabel(r.name))
 					.forEach(roomPanel::add);
 			panel.add(roomPanel);
 		}
 		return panel;
+	}
+
+	public TaskID getID() {
+		return this.taskID;
 	}
 
 	@Override

@@ -20,6 +20,9 @@ public class FormattedJButton extends JButton {
 	/** The Constant notSelectedColor. */
 	public static final Color notSelectedColor = Color.BLUE;
 
+	/** The associated object. */
+	private Object associatedObject;
+
 	/** The selected. */
 	private boolean selected;
 
@@ -45,5 +48,13 @@ public class FormattedJButton extends JButton {
 
 	public boolean isSelectedColor() {
 		return this.selected;
+	}
+
+	public void setAssociatedObject(Object associatedObject) {
+		this.associatedObject = associatedObject;
+	}
+
+	public Object getAssociatedObject() {
+		return this.associatedObject;
 	}
 }

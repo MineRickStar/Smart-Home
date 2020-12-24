@@ -58,7 +58,8 @@ public class ViewTasks extends AbstractView {
 		JButton allTasks = new JButton("Alle Aufgaben");
 		allTasks.addActionListener(e -> this.changeViewToInhabitant(null));
 		this.inhabitantsToChooseAndAllTasks.add(allTasks);
-		Arrays.asList(Inhabitant.values())
+		Arrays.stream(Inhabitant.values())
+				.filter(i -> i.defaultUser)
 				.forEach(i -> {
 					JButton b = new JButton(i.getName());
 					b.addActionListener(e -> this.changeViewToInhabitant(i));

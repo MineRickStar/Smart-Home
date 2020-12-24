@@ -20,7 +20,9 @@ public enum Period {
 	/** The each month. */
 	EACH_MONTH("Jeden Monat", java.time.Period.ofMonths(1)),
 	/** The once. */
-	ONCE("Einmalig", null),;
+	ONCE("Einmalig", null),
+	/** The when nessecary. */
+	WHEN_NESSECARY("Wenn nötig", null);
 
 	/** The name. */
 	private String name;

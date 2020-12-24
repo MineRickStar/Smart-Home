@@ -24,16 +24,41 @@ public enum Room {
 	/** The kellerflur. */
 	KELLERFLUR(Floor.KELLER, "Flur im Keller"),
 
+	// ----- Erdgeschoss -----
+
 	/** The kueche. */
-	KUECHE(Floor.ERDGESCHOSS, "Küche", "Küche"),
+	KUECHE(Floor.ERDGESCHOSS, "Küche"),
 	/** The flur. */
-	FLUR(Floor.ERDGESCHOSS, "Flur", "Flur und Eingangsbereich"),;
+	FLUR_ERDGESCHOSS(Floor.ERDGESCHOSS, "Flur Erdgeschoss", "Flur und Eingangsbereich"),
+	/** The essecke. */
+	ESSECKE(Floor.ERDGESCHOSS, "Essecke"),
+	/** The eingangbereich. */
+	EINGANGBEREICH(Floor.ERDGESCHOSS, "Eingangsbereich"),
+	/** The buero. */
+	BUERO(Floor.ERDGESCHOSS, "Büro"),
+	/** The wohnzimmer. */
+	WOHNZIMMER(Floor.ERDGESCHOSS, "Wohnzimmer"),
+	/** The bad erdgeschoss. */
+	BAD_ERDGESCHOSS(Floor.ERDGESCHOSS, "Bad Erdgeschoss"),
+
+	// ----- 1.Stock -----
+
+	/** The bad erster stok. */
+	BAD_ERSTER_STOK(Floor.ERSTER_STOCK, "Bad 1 Stock"),
+	/** The flur erster stock. */
+	FLUR_ERSTER_STOCK(Floor.ERSTER_STOCK, "Flur 1 Stock"),
+	/** The patricks zimmer. */
+	PATRICKS_ZIMMER(Floor.ERSTER_STOCK, "Patricks Zimmer"),
+	/** The schlafzimmer. */
+	SCHLAFZIMMER(Floor.ERSTER_STOCK, "Schlafzimmer"),
+	/** The mamas zimmer. */
+	MAMAS_ZIMMER(Floor.ERSTER_STOCK, "Mamas Zimmer"),;
 
 	/** The floor. */
-	private final Floor floor;
+	public final Floor floor;
 
 	/** The name. */
-	private final String name;
+	public final String name;
 
 	/** The description. */
 	private final String description;
@@ -62,9 +87,4 @@ public enum Room {
 		this.name = name;
 		this.description = description;
 	}
-
-	public String getName() {
-		return this.name;
-	}
-
 }

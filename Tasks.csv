@@ -1,4 +1,4 @@
 taskID,name,description,createDate,period,nextDueDate,presumableFinishers,whenToFinish,rooms
-7d0304cc-4183-469f-9744-85d217eaec06,Bad putzen,Bad im Keller putzen,2020-11-20T11:39:45.994502600,Jede Woche,2020-11-24T11:39:39.655988700,Patrick/Nicolette/Thomas,AT_THE_DAY,BAD_KELLER,
-5ae40b0f-0c4a-4830-81db-6e63f6e433e7,Müll rausbringen,,2020-11-20T11:40:11.250266200,Jeden 2 Tag,2020-11-20T11:39:47.441421,Patrick/Thomas,AT_THE_DAY,KUECHE,
-4163912f-eee8-47e0-bb66-11feb7576d04,Staubsaugen Kellerflur,,2020-11-20T11:41:14.346899600,Jede Woche,2020-11-21T11:41:05.252661100,Nicolette,NOON,KELLERFLUR,
+5ae40b0f-0c4a-4830-81db-6e63f6e433e7,Müll rausbringen,,2020-11-20T11:40:11.250266200,Jeden 2 Tag,2020-11-20T11:39:47.441421,Patrick/Thomas,AT_THE_DAY,KUECHE,,
+4163912f-eee8-47e0-bb66-11feb7576d04,Staubsaugen Kellerflur,,2020-11-20T11:41:14.346899600,Jede Woche,2020-11-21T11:41:05.252661100,Nicolette,NOON,KELLERFLUR,,
+7d0304cc-4183-469f-9744-85d217eaec06,Bad putzen,Bad im Keller putzen,2020-11-20T11:39:45.994502600,Jede Woche,2020-11-24T11:39:39.655988700,Patrick/Nicolette/Thomas,AT_THE_DAY,BAD_KELLER,,

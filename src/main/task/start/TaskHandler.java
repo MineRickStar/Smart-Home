@@ -43,26 +43,24 @@ public class TaskHandler {
 	/**
 	 * Adds a task with a name of the form "Task-#".
 	 *
-	 * @param nextDueDate  the next due date
-	 * @param period       the period
-	 * @param whenToFinish the when to finish
+	 * @param nextDueDate the next due date
+	 * @param period      the period
 	 * @return the task
 	 */
-	public Task createTask(LocalDateTime nextDueDate, Period period, Time whenToFinish) {
-		return this.createTask("Task-" + TaskHandler.counter++, nextDueDate, period, whenToFinish);
+	public Task createTask(LocalDateTime nextDueDate, Period period) {
+		return this.createTask("Task-" + TaskHandler.counter++, nextDueDate, period);
 	}
 
 	/**
 	 * Adds a task with the given name and now as the createTime.
 	 *
-	 * @param name         the name
-	 * @param nextDueDate  the next due date
-	 * @param period       the period
-	 * @param whenToFinish the when to finish
+	 * @param name        the name
+	 * @param nextDueDate the next due date
+	 * @param period      the period
 	 * @return the task
 	 */
-	public Task createTask(String name, LocalDateTime nextDueDate, Period period, Time whenToFinish) {
-		Task task = new Task(name, LocalDateTime.now(), nextDueDate, period, whenToFinish);
+	public Task createTask(String name, LocalDateTime nextDueDate, Period period) {
+		Task task = new Task(name, LocalDateTime.now(), nextDueDate, period);
 		this.tasks.add(task);
 		return task;
 	}
@@ -81,6 +79,21 @@ public class TaskHandler {
 					return taskInhabitors.contains(inhabitant);
 				})
 				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Gets the task from ID.
+	 *
+	 * @param ID the id
+	 * @return the task from ID
+	 */
+	public Task getTaskFromID(String ID) {
+		TaskID taskID = TaskID.of(ID);
+		return this.tasks.parallelStream()
+				.filter(t -> t.getID()
+						.equals(taskID))
+				.findAny()
+				.orElse(null);
 	}
 
 	public List<Task> getAllTasks() {

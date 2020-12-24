@@ -14,10 +14,15 @@ public enum Inhabitant {
 	/** The nicolette. */
 	NICOLETTE("Nicolette"),
 	/** The thomas. */
-	THOMAS("Thomas"),;
+	THOMAS("Thomas"),
+	/** The other. */
+	OTHER("Jemand anderes", false);
 
 	/** The Constant name. */
 	public final String name;
+
+	/** The default user. */
+	public final boolean defaultUser;
 
 	/**
 	 * Instantiates a new inhabitant.
@@ -25,7 +30,18 @@ public enum Inhabitant {
 	 * @param name the name
 	 */
 	Inhabitant(String name) {
+		this(name, true);
+	}
+
+	/**
+	 * Instantiates a new inhabitant.
+	 *
+	 * @param name        the name
+	 * @param defaultUser the default user
+	 */
+	Inhabitant(String name, boolean defaultUser) {
 		this.name = name;
+		this.defaultUser = defaultUser;
 	}
 
 	public String getName() {
