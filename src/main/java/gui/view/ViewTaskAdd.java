@@ -34,11 +34,11 @@ import javax.swing.SpringLayout;
 
 import gui.BackgroundPanel;
 import gui.BackgroundPanel.View;
-import start.Floor;
-import start.Period;
-import start.Room;
-import start.Task;
-import start.TaskHandler;
+import tasks.Floor;
+import tasks.Period;
+import tasks.Room;
+import tasks.Task;
+import tasks.TaskHandler;
 import user.Inhabitant;
 import utils.FormattedJButton;
 
@@ -169,7 +169,7 @@ public class ViewTaskAdd extends AbstractView {
 	 */
 	private void addButtons() {
 		// BackButton
-		this.addBackButton();
+		this.addBackButton(View.TASKS);
 		// NameLabel
 		this.layout.putConstraint(SpringLayout.WEST, this.nameLabel, Spring.constant(10, 10, 50), SpringLayout.WEST,
 				this);

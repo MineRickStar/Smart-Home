@@ -7,6 +7,7 @@ import java.awt.Image;
 
 import javax.swing.JPanel;
 
+import gui.view.TaskView;
 import gui.view.ViewDefault;
 import gui.view.ViewTaskAdd;
 import gui.view.ViewTasks;
@@ -46,8 +47,12 @@ public class BackgroundPanel extends JPanel {
 		case DEFAULT:
 			this.add(new ViewDefault(this));
 			break;
+		case TASKS:
+			this.add(new TaskView(this));
+			break;
 		case VIEW_TASKS:
 			this.add(new ViewTasks(this));
+			break;
 		}
 		this.revalidate();
 		this.repaint();
@@ -62,6 +67,8 @@ public class BackgroundPanel extends JPanel {
 		ADD_TASK,
 		/** The default. */
 		DEFAULT,
+		/** The tasks. */
+		TASKS,
 		/** The view tasks. */
 		VIEW_TASKS;
 	}

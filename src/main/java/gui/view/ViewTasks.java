@@ -13,8 +13,8 @@ import javax.swing.SpringLayout;
 
 import gui.BackgroundPanel;
 import gui.BackgroundPanel.View;
-import start.Task;
-import start.TaskHandler;
+import tasks.Task;
+import tasks.TaskHandler;
 import user.Inhabitant;
 
 /**
@@ -48,7 +48,7 @@ public class ViewTasks extends AbstractView {
 		this.choosePanel = this.createChoosePanel();
 		this.addLayout();
 		this.add(this.choosePanel);
-		this.addBackButton();
+		this.addBackButton(View.TASKS);
 	}
 
 	/**
