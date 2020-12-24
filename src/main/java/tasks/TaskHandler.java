@@ -1,4 +1,4 @@
-package start;
+package tasks;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -48,8 +48,8 @@ public class TaskHandler {
 	 * @param whenToFinish the when to finish
 	 * @return the task
 	 */
-	public Task createTask(LocalDateTime nextDueDate, Period period, Time whenToFinish) {
-		return this.createTask("Task-" + TaskHandler.counter++, nextDueDate, period, whenToFinish);
+	public Task createTask(LocalDateTime nextDueDate, Period period) {
+		return this.createTask("Task-" + TaskHandler.counter++, nextDueDate, period);
 	}
 
 	/**
@@ -61,8 +61,8 @@ public class TaskHandler {
 	 * @param whenToFinish the when to finish
 	 * @return the task
 	 */
-	public Task createTask(String name, LocalDateTime nextDueDate, Period period, Time whenToFinish) {
-		Task task = new Task(name, LocalDateTime.now(), nextDueDate, period, whenToFinish);
+	public Task createTask(String name, LocalDateTime nextDueDate, Period period) {
+		Task task = new Task(name, LocalDateTime.now(), nextDueDate, period);
 		this.tasks.add(task);
 		return task;
 	}

@@ -1,4 +1,4 @@
-package start;
+package tasks;
 
 import java.awt.GridLayout;
 import java.time.LocalDateTime;
@@ -43,9 +43,6 @@ public class Task implements Comparable<Task> {
 	/** The finished. */
 	private final HashMap<Inhabitant, List<LocalDateTime>> finished;
 
-	/** The when to finish. */
-	private Time whenToFinish;
-
 	/** The rooms. */
 	private List<Room> rooms;
 
@@ -68,9 +65,8 @@ public class Task implements Comparable<Task> {
 					.collect(Collectors.toList());
 		}
 		this.finished = new HashMap<>();
-		this.whenToFinish = Time.valueOf(fields[7]);
-		if (!fields[8].isEmpty()) {
-			this.rooms = Arrays.stream(fields[8].split("/"))
+		if (!fields[7].isEmpty()) {
+			this.rooms = Arrays.stream(fields[7].split("/"))
 					.map(Room::valueOf)
 					.collect(Collectors.toList());
 		}
@@ -85,13 +81,12 @@ public class Task implements Comparable<Task> {
 	 * @param period       the period
 	 * @param whenToFinish the when to finish
 	 */
-	public Task(String name, LocalDateTime createDate, LocalDateTime nextDueDate, Period period, Time whenToFinish) {
+	public Task(String name, LocalDateTime createDate, LocalDateTime nextDueDate, Period period) {
 		this.taskID = TaskID.getRandomID();
 		this.name = name;
 		this.createDate = createDate;
 		this.nextDueDate = nextDueDate;
 		this.period = period;
-		this.whenToFinish = whenToFinish;
 		this.finished = new HashMap<>();
 		this.suitableFor = new ArrayList<>();
 	}
@@ -192,7 +187,6 @@ public class Task implements Comparable<Task> {
 					.toString());
 		}
 		sb.append(",");
-		sb.append(this.whenToFinish.toString() + ",");
 		if (this.rooms != null) {
 			sb.append(this.rooms.stream()
 					.map(Room::name)
