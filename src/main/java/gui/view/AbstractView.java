@@ -68,10 +68,6 @@ public abstract class AbstractView extends JPanel {
 		this.addBackButton(View.DEFAULT, this.NORTH_WEST, 10);
 	}
 
-	protected final void addBackButton(View view) {
-		this.addBackButton(view, this.NORTH_WEST, 10);
-	}
-
 	/**
 	 * Adds the back button.
 	 *

@@ -29,13 +29,13 @@ import javax.swing.SpringLayout;
 
 import gui.BackgroundPanel;
 import gui.BackgroundPanel.View;
-import tasks.Period;
-import tasks.Room;
-import tasks.Task;
-import tasks.TaskHandler;
+import start.Period;
+import start.Room;
+import start.Task;
+import start.TaskHandler;
+import start.Time;
 import user.Inhabitant;
-import utils.FormattedJPanel;
-import utils.FormattedJPanel.FormattedButton;
+import utils.FormattedJButton;
 
 /**
  * The Class ViewTaskAdd.
@@ -60,16 +60,19 @@ public class ViewTaskAdd extends AbstractView {
 	private JTextArea descriptionArea;
 
 	/** The days. */
-	private List<FormattedJPanel> days;
+	private List<FormattedJButton> days;
 
 	/** The periods. */
-	private List<FormattedJPanel> periods;
+	private List<FormattedJButton> periods;
+
+	/** The times. */
+	private List<FormattedJButton> times;
 
 	/** The rooms. */
-	private Map<FormattedJPanel, Room> rooms;
+	private Map<FormattedJButton, Room> rooms;
 
 	/** The finishers. */
-	private Map<FormattedJPanel, Inhabitant> finishers;
+	private Map<FormattedJButton, Inhabitant> finishers;
 
 	/** The ok. */
 	private JButton ok;
@@ -84,7 +87,8 @@ public class ViewTaskAdd extends AbstractView {
 		this.initButtons();
 		this.addButtons();
 
-		this.addActionListenerToPeriods();
+		this.addActionListener(this.periods, true);
+		this.addActionListener(this.times, false);
 		this.addActionListenerToRooms();
 		this.addActionListenerToDays();
 		this.addActionListenerToFinisher();
@@ -108,23 +112,28 @@ public class ViewTaskAdd extends AbstractView {
 
 		this.days = IntStream.range(0, 35)
 				.boxed()
-				.map(i -> new FormattedJPanel(LocalDateTime.now()
+				.map(i -> new FormattedJButton(LocalDateTime.now()
 						.plusDays(i)
-						.format(this.buttonFormatter), false, null))
+						.format(this.buttonFormatter), false))
 				.collect(Collectors.toList());
 
 		this.periods = Arrays.stream(Period.values())
-				.map(p -> new FormattedJPanel(p.getName(), false, null))
-				.peek(b -> b.getButton()
-						.setSelectedColor(b.getText()
-								.equals("Jede Woche")))
+				.map(p -> new FormattedJButton(p.getName(), false))
+				.peek(b -> b.setSelectedColor(b.getText()
+						.equals("Jede Woche")))
+				.collect(Collectors.toList());
+
+		this.times = Arrays.stream(Time.values())
+				.map(t -> new FormattedJButton(t.getDisplayName(), false))
+				.peek(b -> b.setSelectedColor(b.getText()
+						.equals("Am Tag")))
 				.collect(Collectors.toList());
 
 		this.rooms = Arrays.stream(Room.values())
-				.collect(Collectors.toMap(r -> new FormattedJPanel(r.getName(), false, new Dimension(80, 22)), r -> r));
+				.collect(Collectors.toMap(r -> new FormattedJButton(r.getName(), false), r -> r));
 
 		this.finishers = Arrays.stream(Inhabitant.values())
-				.collect(Collectors.toMap(i -> new FormattedJPanel(i.getName(), true, null), t -> t));
+				.collect(Collectors.toMap(i -> new FormattedJButton(i.getName(), true), t -> t));
 
 		this.ok = new JButton("OK");
 
@@ -134,12 +143,13 @@ public class ViewTaskAdd extends AbstractView {
 			if (name.isBlank() && description.isBlank() && this.selectedRooms.isEmpty()) { return; }
 
 			Task task = TaskHandler.getInstance()
-					.createTask(name, this.start, this.period);
+					.createTask(name, this.start, this.period, this.time);
 			task.addDescription(description);
 			if (!this.selectedRooms.isEmpty()) {
 				task.addRooms(this.selectedRooms);
 			}
 			task.addTaskForThem(this.presumableFinishers);
+			task.addRooms(this.selectedRooms);
 			this.parent.changeView(View.DEFAULT);
 			TaskHandler.getInstance()
 					.writeCSV();
@@ -151,7 +161,7 @@ public class ViewTaskAdd extends AbstractView {
 	 */
 	private void addButtons() {
 		// BackButton
-		this.addBackButton(View.TASKS);
+		this.addBackButton();
 		// NameLabel
 		this.layout.putConstraint(SpringLayout.WEST, this.nameLabel, Spring.constant(10, 10, 50), SpringLayout.WEST,
 				this);
@@ -246,12 +256,16 @@ public class ViewTaskAdd extends AbstractView {
 		datesAndTimes.setLayout(layout);
 		datesAndTimes.setOpaque(false);
 
-		layout.linkSize(this.periods.toArray(FormattedJPanel[]::new));
+		layout.linkSize(this.periods.toArray(FormattedJButton[]::new));
+		layout.linkSize(this.times.toArray(FormattedJButton[]::new));
 		layout.linkSize(this.rooms.keySet()
-				.toArray(FormattedJPanel[]::new));
+				.toArray(FormattedJButton[]::new));
 
 		ParallelGroup trailingGroup = layout.createParallelGroup(GroupLayout.Alignment.TRAILING);
 		this.periods.forEach(trailingGroup::addComponent);
+
+		ParallelGroup centerGroup = layout.createParallelGroup(GroupLayout.Alignment.CENTER);
+		this.times.forEach(centerGroup::addComponent);
 
 		ParallelGroup leadingGroup = layout.createParallelGroup(GroupLayout.Alignment.LEADING);
 		this.rooms.keySet()
@@ -259,15 +273,19 @@ public class ViewTaskAdd extends AbstractView {
 
 		layout.setHorizontalGroup(layout.createSequentialGroup()
 				.addGroup(trailingGroup)
+				.addGroup(centerGroup)
 				.addGroup(leadingGroup));
 
 		SequentialGroup sGroup = layout.createSequentialGroup();
 
-		List<FormattedJPanel> roomKeys = new ArrayList<>(this.rooms.keySet());
-		for (int i = 0, n = Math.max(this.periods.size(), this.rooms.size()); i < n; i++) {
+		List<FormattedJButton> roomKeys = new ArrayList<>(this.rooms.keySet());
+		for (int i = 0, n = Math.max(Math.max(this.periods.size(), this.times.size()), this.rooms.size()); i < n; i++) {
 			ParallelGroup group = layout.createParallelGroup(GroupLayout.Alignment.BASELINE);
 			if (this.periods.size() > i) {
 				group.addComponent(this.periods.get(i));
+			}
+			if (this.times.size() > i) {
+				group.addComponent(this.times.get(i));
 			}
 			if (this.rooms.size() > i) {
 				group.addComponent(roomKeys.get(i));
@@ -295,7 +313,7 @@ public class ViewTaskAdd extends AbstractView {
 		finisherPanel.setOpaque(false);
 
 		layout.linkSize(this.finishers.keySet()
-				.toArray(FormattedJPanel[]::new));
+				.toArray(FormattedJButton[]::new));
 
 		ParallelGroup horizontalGroup = layout.createParallelGroup(GroupLayout.Alignment.LEADING);
 		SequentialGroup verticalGroup = layout.createSequentialGroup();
@@ -313,21 +331,24 @@ public class ViewTaskAdd extends AbstractView {
 	/**
 	 * Adds the action listener.
 	 *
-	 * @param panels the buttons
-	 * @param period the period
+	 * @param buttons the buttons
+	 * @param period  the period
 	 */
-	private void addActionListenerToPeriods() {
-		this.periods.forEach(panel -> {
-			panel.addActionListener(e -> {
-				FormattedButton source = (FormattedButton) e.getSource();
-				for (int i = 0; i < this.periods.size(); i++) {
-					FormattedJPanel panel0 = this.periods.get(i);
-					if (panel0.getButton()
-							.equals(source)) {
-						this.period = Period.values()[i];
-						panel0.setBackground(Color.GREEN);
+	private void addActionListener(List<FormattedJButton> buttons, boolean period) {
+		buttons.forEach(button -> {
+			button.addActionListener(e -> {
+				FormattedJButton source = (FormattedJButton) e.getSource();
+				for (int i = 0; i < buttons.size(); i++) {
+					FormattedJButton button0 = buttons.get(i);
+					if (button0.equals(source)) {
+						if (period) {
+							this.period = Period.values()[i];
+						} else {
+							this.time = Time.values()[i];
+						}
+						button0.setBackground(Color.GREEN);
 					} else {
-						panel0.setBackground(Color.BLUE);
+						button0.setBackground(Color.BLUE);
 					}
 				}
 			});
@@ -338,16 +359,16 @@ public class ViewTaskAdd extends AbstractView {
 	 * Adds the action listener to rooms.
 	 */
 	private void addActionListenerToRooms() {
-		this.rooms.forEach((panel, room) -> {
-			panel.addActionListener(e -> {
-				FormattedButton source = (FormattedButton) e.getSource();
-				if (source.equals(panel.getButton())) {
-					if (source.isSelectedColor()) {
+		this.rooms.forEach((button, room) -> {
+			button.addActionListener(e -> {
+				FormattedJButton source = (FormattedJButton) e.getSource();
+				if (source.equals(button)) {
+					if (button.isSelectedColor()) {
 						this.selectedRooms.remove(room);
-						source.setSelectedColor(false);
+						button.setSelectedColor(false);
 					} else {
 						this.selectedRooms.add(room);
-						source.setSelectedColor(true);
+						button.setSelectedColor(true);
 					}
 				}
 			});
@@ -359,19 +380,17 @@ public class ViewTaskAdd extends AbstractView {
 	 */
 	private void addActionListenerToDays() {
 		for (int i = 0; i < this.days.size(); i++) {
-			FormattedJPanel panel = this.days.get(i);
-			panel.setActionCommand(String.valueOf(i));
+			FormattedJButton button = this.days.get(i);
+			button.setActionCommand(String.valueOf(i));
 			if (i == 0) {
-				panel.getButton()
-						.setSelectedColor(false);
+				button.setBackground(Color.GREEN);
 			} else {
-				panel.setBackground(Color.BLUE);
+				button.setBackground(Color.BLUE);
 			}
-			panel.addActionListener(e -> {
-				FormattedButton source = (FormattedButton) e.getSource();
+			button.addActionListener(e -> {
+				FormattedJButton source = (FormattedJButton) e.getSource();
 				this.days.forEach(dayButton -> {
-					if (dayButton.getButton()
-							.equals(source)) {
+					if (dayButton.equals(source)) {
 						dayButton.setBackground(Color.GREEN);
 						this.start = LocalDateTime.now()
 								.plusDays(Integer.parseInt(source.getActionCommand()));
@@ -387,16 +406,16 @@ public class ViewTaskAdd extends AbstractView {
 	 * Adds the action listener to finisher.
 	 */
 	private void addActionListenerToFinisher() {
-		this.finishers.forEach((panel, inhabitant) -> {
-			panel.addActionListener(e -> {
-				FormattedButton source = (FormattedButton) e.getSource();
-				if (source.equals(panel.getButton())) {
-					if (source.isSelectedColor()) {
+		this.finishers.forEach((button, inhabitant) -> {
+			button.addActionListener(e -> {
+				FormattedJButton source = (FormattedJButton) e.getSource();
+				if (source.equals(button)) {
+					if (button.isSelectedColor()) {
 						this.presumableFinishers.remove(inhabitant);
-						source.setSelectedColor(false);
+						button.setSelectedColor(false);
 					} else {
 						this.presumableFinishers.add(inhabitant);
-						source.setSelectedColor(true);
+						button.setSelectedColor(true);
 					}
 				}
 			});
@@ -405,6 +424,9 @@ public class ViewTaskAdd extends AbstractView {
 
 	/** The periodLabel. */
 	private Period period = Period.EACH_WEEK;
+
+	/** The time. */
+	private Time time = Time.AT_THE_DAY;
 
 	/** The start. */
 	private LocalDateTime start = LocalDateTime.now();
